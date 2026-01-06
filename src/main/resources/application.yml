@@ -1,0 +1,17 @@
+spring:
+  application:
+      name: backend
+  data:
+    mongodb:
+      uri: mongodb+srv://coderrr1ck1:coderrr1ck1@microservicecluster.sa9c4im.mongodb.net/backend
+      auto-index-creation: true
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.repository.query: DEBUG
+    org:
+      springframework:
+        security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId}] %-5level %logger{36} - %msg%n"
