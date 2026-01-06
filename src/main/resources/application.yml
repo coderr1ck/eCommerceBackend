@@ -3,7 +3,7 @@ spring:
       name: backend
   data:
     mongodb:
-      uri: mongodb+srv://coderrr1ck1:coderrr1ck1@microservicecluster.sa9c4im.mongodb.net/backend
+      uri: your-uri-here
       auto-index-creation: true
 
 logging:
