@@ -1,13 +1,13 @@
 package com.coderrr1ck.backend.auth;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -22,6 +22,11 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest registerRequest
     ) {
         return authService.saveUser(registerRequest);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<AuthResponse> getAuthUser(){
+        return ResponseEntity.ok(authService.getAuthUser());
     }
 
 }

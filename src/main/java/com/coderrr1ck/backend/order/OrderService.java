@@ -38,9 +38,19 @@ public class OrderService {
 
 
     public OrderResponse saveOrder(OrderRequest orderRequest) {
-        if (orderRequest.getItems() == null || orderRequest.getItems().isEmpty()) {
+
+        if (orderRequest == null || orderRequest.getItems() == null || orderRequest.getItems().isEmpty()) {
             throw new InvalidOrderRequestException("Order request items cannot be empty");
         }
+
+        if(orderRequest.getOrderId() == null){
+            throw new InvalidOrderRequestException("Order ID cannot be null");
+        }
+
+        if(orderRepository.existsById(orderRequest.getOrderId())){
+            throw new InvalidOrderRequestException("Order with ID "+orderRequest.getOrderId()+" already exists");
+        }
+
         Map<String, Integer> qtyByProductId = orderRequest.getItems().stream()
                 .collect(Collectors.groupingBy(
                         OrderItemRequest::getProductId,
@@ -142,5 +152,24 @@ public class OrderService {
                 pagedResponse.isLast(),
                 pagedResponse.isFirst()
         );
+    }
+
+    public List<OrderItemResponse> getOrderItems(String orderId) {
+
+        Order order = orderRepository.findById(orderId).orElseThrow(()-> {
+                    throw new OrderNotFoundException(orderId);
+                }
+        );
+
+        List<OrderItemResponse> itemResponses = order
+                .getItems()
+                .stream()
+                .map((item)->
+                        new OrderItemResponse(item.getProduct().getProductId()
+                                ,item.getProduct().getName()
+                                ,item.getQuantity()
+                                ,item.getItemTotal()))
+                .toList();
+        return itemResponses;
     }
 }

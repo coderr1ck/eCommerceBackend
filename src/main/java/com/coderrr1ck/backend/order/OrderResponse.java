@@ -9,15 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class OrderResponse {
-//    private static class OrderItemResponse{
-//        String id;
-//        String name;
-//        String quantity;
-//        BigDecimal unitPrice;
-//    }
-
     private String id;
     private OrderStatus status;
-//    private List<OrderItemResponse> itemList;
     private BigDecimal orderTotal;
 }

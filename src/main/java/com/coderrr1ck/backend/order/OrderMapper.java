@@ -20,9 +20,13 @@ public class OrderMapper {
     private ProductRepository productRepository;
     public Order toOrder(OrderRequest orderRequest,List<OrderItem> itemList, BigDecimal totalAmount) {
         Order order = new Order();
-        order.setUserId(orderRequest.getUserId());
+        order.setCustomerName(orderRequest.getCustomerName());
+        order.setCustomerPhone(orderRequest.getCustomerPhone());
+        order.setOrderId(orderRequest.getOrderId());
+        order.setUserId(null);
         order.setItems(itemList);
         order.setTotalAmount(totalAmount);
+        order.setDueAmount(totalAmount);
         order.setStatus(OrderStatus.CREATED);
         return order;
     }

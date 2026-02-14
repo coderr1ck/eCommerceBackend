@@ -3,15 +3,38 @@ spring:
       name: backend
   data:
     mongodb:
-      uri: mongodb+srv://coderrr1ck1:coderrr1ck1@microservicecluster.sa9c4im.mongodb.net/backend
+      uri: your_mongodb_connection_string
       auto-index-creation: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: your_client_id
+            client-secret: your_client_secret
+            scope:
+              - email
+              - profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 
 logging:
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.data.mongodb.repository.query: DEBUG
-    org:
-      springframework:
-        security: DEBUG
+    org.springframework.web.cors: TRACE
+    org.springframework.security: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId}] %-5level %logger{36} - %msg%n"

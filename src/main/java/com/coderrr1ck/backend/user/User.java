@@ -1,5 +1,6 @@
 package com.coderrr1ck.backend.user;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -30,11 +31,14 @@ public class User implements UserDetails {
     @Indexed(unique = true)
     private String email;
 
-    @NotNull
+    @Nullable
     private String password;
 
     @NotNull
     private Role role;
+
+    @NotNull
+    private List<AuthProvider> authProviders;
 
     private boolean active = true;
 

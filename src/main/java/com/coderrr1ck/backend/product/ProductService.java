@@ -22,7 +22,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper mapper;
 
-    public PagedResponseDTO<ProductResponse> getAllProducts(SearchRequest searchRequest) {
+    public PagedResponseDTO<ProductResponse> getAllProducts(SearchRequest searchRequest,String categoryId) {
         Pageable pageRequest = Pageable.ofSize(searchRequest.getSize()).withPage(searchRequest.getPage());
         Page<Product> pagedResponse = null;
         if(!StringUtils.isBlank(searchRequest.getQuery())){
@@ -30,6 +30,8 @@ public class ProductService {
             String keyword = ".*"+searchRequest.getQuery()+".*";
             pagedResponse = productRepository.findByNameRegexAndActiveTrue(keyword,pageRequest);
             System.out.println("Returning product searched query paged response");
+        }else if(!StringUtils.isBlank(categoryId)){
+            pagedResponse = productRepository.findByCategoryIdAndActiveTrue(pageRequest,categoryId);
         }else {
             pagedResponse = productRepository.findByActiveTrue(pageRequest);
         }
@@ -37,6 +39,7 @@ public class ProductService {
         List<ProductResponse> responseList = products.stream()
                 .map(mapper::toProductResponse)
                 .toList();
+
         return new PagedResponseDTO<>(
                 responseList,
                 pagedResponse.getNumber(),
@@ -56,8 +59,9 @@ public class ProductService {
 
         if(productInactive.isPresent()){
             Product productExists = productInactive.get();
-            productExists.setActive(true);
-            return mapper.toProductResponse(productRepository.save(productExists));
+            Product updatedProduct = mapper.mapProductRequestToProduct(productRequest, productExists);
+            Product savedProduct = productRepository.save(updatedProduct);
+            return mapper.toProductResponse(savedProduct);
         }
         Product product = mapper.toProduct(productRequest);
         Product savedProduct = productRepository.save(product);
@@ -72,8 +76,9 @@ public class ProductService {
         if(product.getActive()==false){
             throw new ProductNotFoundException(product.getProductId());
         }
+        Optional<Product> existingProductByName = productRepository.findByNameAndActiveFalse(productRequest.getName());
 
-        if(productRepository.existsByNameAndActiveTrue(productRequest.getName())) {
+        if(existingProductByName.isPresent() && !existingProductByName.get().getProductId().equals(id)) {
             throw new ProductAlreadyExistsException(productRequest.getName());
         }
 
@@ -81,6 +86,7 @@ public class ProductService {
         Product updatedSavedProduct = productRepository.save(updatedProduct);
         return mapper.toProductResponse(updatedSavedProduct);
     }
+
 
     public void deleteProduct(String id) {
         Product product = productRepository.findById(id)

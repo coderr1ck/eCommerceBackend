@@ -3,6 +3,7 @@ package com.coderrr1ck.backend.product;
 import com.coderrr1ck.backend.config.PagedResponseDTO;
 import com.coderrr1ck.backend.config.SearchRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,12 @@ public class ProductController {
 //       apply pagination later
        @GetMapping
        public ResponseEntity<PagedResponseDTO<ProductResponse>> getAllProducts(
-               @Valid SearchRequest searchRequest
+               @Valid SearchRequest searchRequest,
+               @RequestParam(value = "categoryId" , required = false)
+               @Pattern(regexp = "^[a-zA-Z0-9\\s]*$",message = "Please provide valid categoryId")
+               String categoryId
                ) {
-           PagedResponseDTO<ProductResponse> allProducts = productService.getAllProducts(searchRequest);
+           PagedResponseDTO<ProductResponse> allProducts = productService.getAllProducts(searchRequest,categoryId);
            return ResponseEntity.ok(allProducts);
        }
 

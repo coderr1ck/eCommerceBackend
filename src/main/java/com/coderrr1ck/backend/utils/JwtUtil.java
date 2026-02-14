@@ -14,7 +14,7 @@ import java.util.Date;
 @Service
 public class JwtUtil {
 
-    @Value("${application.security.jwt.accessExpiration:900000}")
+    @Value("${application.security.jwt.accessExpiration:3600000}")
     private long jwtExpiration;
 
     @Value("${application.security.jwt.refreshExpiration:604800000}")

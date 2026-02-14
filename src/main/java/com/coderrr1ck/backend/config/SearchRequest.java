@@ -1,5 +1,6 @@
 package com.coderrr1ck.backend.config;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,7 @@ public class SearchRequest {
         private int size = 10;
 
         @Size(max = 50 ,message = "Search keyword is too long.")
-        @Pattern(regexp = "^[a-zA-Z0-9\\s]+$",message = "Please provide valid search keyword")
+        @Pattern(regexp = "^[a-zA-Z0-9\\s]*$",message = "Please provide valid search keyword")
         private String query;
 
         public String getQuery() {

@@ -4,7 +4,10 @@ import com.coderrr1ck.backend.auth.UserAlreadyExistsException;
 import com.coderrr1ck.backend.category.CategoryAlreadyExistsException;
 import com.coderrr1ck.backend.category.CategoryNotFoundException;
 import com.coderrr1ck.backend.order.InsufficientStockException;
+import com.coderrr1ck.backend.order.OrderNotFoundException;
 import com.coderrr1ck.backend.order.ProductNotFoundInOrder;
+import com.coderrr1ck.backend.payment.InvalidPaymentRequest;
+import com.coderrr1ck.backend.payment.PaymentAlreadyCompleted;
 import com.coderrr1ck.backend.product.ProductAlreadyExistsException;
 import com.coderrr1ck.backend.product.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,13 +27,13 @@ import java.util.*;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({CategoryAlreadyExistsException.class, ProductAlreadyExistsException.class, InsufficientStockException.class, UserAlreadyExistsException.class})
+    @ExceptionHandler({CategoryAlreadyExistsException.class, ProductAlreadyExistsException.class, InsufficientStockException.class, UserAlreadyExistsException.class, PaymentAlreadyCompleted.class, InvalidPaymentRequest.class})
     public ResponseEntity<ErrorResponse> handleExceptionNotExist(Exception ex, HttpServletResponse res) throws IOException {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
-    @ExceptionHandler({CategoryNotFoundException.class, ProductNotFoundException.class, ProductNotFoundInOrder.class})
+    @ExceptionHandler({CategoryNotFoundException.class, ProductNotFoundException.class, ProductNotFoundInOrder.class, OrderNotFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ErrorResponse> handleExceptionNotFound(Exception ex, HttpServletResponse res) throws IOException {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
@@ -57,7 +61,7 @@ public class GlobalExceptionHandler {
 
 
         if(ex instanceof AuthenticationException){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ErrorResponse(
                             HttpStatus.UNAUTHORIZED,
                             ex.getMessage()

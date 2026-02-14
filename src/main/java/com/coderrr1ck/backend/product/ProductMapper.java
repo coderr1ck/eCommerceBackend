@@ -40,7 +40,11 @@ public class ProductMapper {
     }
 
     public Product mapProductRequestToProduct(ProductRequest productRequest, Product product) {
+        if(!categoryRepository.existsByCategoryIdAndActiveTrue(productRequest.getCategoryId())) {
+            throw new CategoryNotFoundException(productRequest.getCategoryId());
+        }
         product.setName(productRequest.getName());
+        product.setCategoryId(productRequest.getCategoryId());
         product.setDescription(productRequest.getDescription());
         product.setStock(productRequest.getStock());
         product.setPrice(productRequest.getPrice());

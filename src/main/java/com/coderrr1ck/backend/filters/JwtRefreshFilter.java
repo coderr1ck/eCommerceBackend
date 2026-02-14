@@ -47,7 +47,11 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
         Authentication authResult = authenticationManager.authenticate(authToken);
         if(authResult.isAuthenticated()){
             String newAccessToken = jwtUtil.generateAccessToken(authResult.getName());
-            response.setHeader("Authorization", "Bearer " + newAccessToken);
+            Cookie accessCookie = new Cookie("accessToken", newAccessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setMaxAge(60*60);
+            accessCookie.setPath("/api/v1");
+            response.addCookie(accessCookie);
 //            no need to implment new refresh token generation for now
         }
 

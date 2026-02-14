@@ -6,7 +6,10 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -26,5 +29,12 @@ public class OrderController {
             @Valid SearchRequest searchRequest
             ) {
         return ResponseEntity.ok(orderService.getAllOrders(searchRequest));
+    }
+
+    @GetMapping("/items/{orderId}")
+    public ResponseEntity<List<OrderItemResponse>> getOrderItems(
+            @PathVariable String orderId
+    ) {
+        return ResponseEntity.ok(orderService.getOrderItems(orderId));
     }
 }
