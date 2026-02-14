@@ -3,7 +3,7 @@ spring:
       name: backend
   data:
     mongodb:
-      uri: your_mongodb_connection_string
+      uri: your-uri-here
       auto-index-creation: true
 
   security:
@@ -34,7 +34,8 @@ logging:
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.data.mongodb.repository.query: DEBUG
-    org.springframework.web.cors: TRACE
-    org.springframework.security: TRACE
+    org:
+      springframework:
+        security: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId}] %-5level %logger{36} - %msg%n"
