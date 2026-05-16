@@ -1,4 +1,4 @@
 package com.coderrr1ck.backend.order;
 
-public class OrderRequest {
+public enum OrderPaymentStatus {
 }
