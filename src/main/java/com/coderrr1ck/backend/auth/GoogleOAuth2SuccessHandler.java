@@ -1,5 +1,7 @@
 package com.coderrr1ck.backend.auth;
 
+import com.coderrr1ck.backend.role.Role;
+import com.coderrr1ck.backend.role.RoleRepository;
 import com.coderrr1ck.backend.user.*;
 import com.coderrr1ck.backend.utils.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -7,6 +9,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -19,13 +23,15 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Value("${FRONTEND_URL:http://localhost:5173}")
     private String frontendUrl;
@@ -49,11 +55,14 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                     userRepository.save(savedUser);
                 }
             } else {
+                Role defaultRole = roleRepository.findByRoleNameAndActiveTrue("ROLE_USER").
+                        orElseThrow(() -> new RuntimeException("Default role USER not found"));
+
                 User newUser = User.builder()
                         .email(email)
                         .username(username)
                         .password(null)
-                        .role(Role.USER)
+                        .roles(Set.of(defaultRole))
                         .authProviders(List.of(AuthProvider.GOOGLE))
                         .active(true)
                         .build();

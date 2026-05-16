@@ -1,47 +1,64 @@
 package com.coderrr1ck.backend.order;
 
-import com.coderrr1ck.backend.product.Product;
+import com.coderrr1ck.backend.address.Address;
+import com.coderrr1ck.backend.user.User;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-@Document(collection = "orders")
+@Entity
+@Table(name = "orders")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+// apply unique constraint on orderId and userId to prevent duplicate orders for same user
 public class Order {
 
     @Id
-    private String orderId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID orderId;
 
-    @Indexed
-    private String userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
 
-    @NotNull
-    private List<OrderItem> items;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id") // apply not null constraint
+    private Address address;
+
+    @Min(value = 0, message = "Total items cannot be negative")
+    @Column(nullable = false)
+    private Integer totalItems;
 
     @Min(value = 0, message = "Total amount cannot be negative")
-    private BigDecimal totalAmount;
+    @Column(precision = 12, scale = 2,nullable = false)
+    private BigDecimal subTotal;
 
-    @Min(value = 0, message = "Due amount cannot be negative")
-    private BigDecimal dueAmount;
+    @Column(unique = true,nullable = false)
+    private UUID idempotencyKey;
 
-    private String customerName;
-
-    private String customerPhone;
-
+    @Enumerated(EnumType.STRING)
+    @NotNull
     private OrderStatus status;
 
-    private List<String> paymentIds = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private OrderPaymentStatus orderPaymentStatus;
 
     @CreatedDate
     private Instant createdAt;
@@ -49,8 +66,21 @@ public class Order {
     @LastModifiedDate
     private Instant updatedAt;
 
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
     private boolean active = true;
 
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
 }
 
 

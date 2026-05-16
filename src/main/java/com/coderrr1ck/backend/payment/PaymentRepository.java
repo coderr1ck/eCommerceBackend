@@ -1,19 +1,20 @@
 package com.coderrr1ck.backend.payment;
 
 
+import com.coderrr1ck.backend.order.Order;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PaymentRepository extends MongoRepository<Payment,String> {
-    Optional<Payment> findByOrderId(String orderId);
+public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+//    List<Payment> findByOrderIdAndPaymentStatus(UUID orderId, PaymentStatus paymentStatus);
 
-    List<Payment> findByOrderIdAndPaymentStatus(String orderId, PaymentStatus paymentStatus);
-
-    Optional<OnlinePayment> findByGatewayOrderRefId(String s);
+    Optional<Payment> findByOrder(Order order);
+    Optional<Payment> findByGatewayOrderRefId(String s);
 }

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8080}")
+    @Value("${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8080,http://127.0.0.1:5501}")
     private String allowedOrigins;
 
     public SecurityConfig(UserService userService, JwtUtil jwtUtil) {
@@ -101,6 +101,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/oauth2/authorization/google",
+                                "/api/v1/payments/webhook/razorpay/verify",
                                 "/v2/api-docs",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

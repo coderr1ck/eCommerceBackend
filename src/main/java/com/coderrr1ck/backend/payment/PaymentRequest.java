@@ -1,27 +1,18 @@
 package com.coderrr1ck.backend.payment;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class PaymentRequest {
-    @NotBlank(message = "Payment ID is required")
-    @Pattern(regexp = "^[0-9a-fA-F]{24}$", message = "Please provide valid Payment ID")
-    private String paymentId;
+    @NotNull(message = "Order Id is required")
+    private UUID orderId;
 
-    @NotBlank(message = "Order ID is required")
-    @Pattern(regexp = "^[0-9a-fA-F]{24}$", message = "Please provide valid Order ID")
-    private String orderId;
-
-    @Positive(message = "Amount must be greater than 0")
-    private BigDecimal amount;
-
-    private boolean onlinePayment;
+    @NotNull(message = "Payment Method is required")
+    private PaymentMode paymentMode;
 }

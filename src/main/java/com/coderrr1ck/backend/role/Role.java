@@ -1,6 +1,7 @@
-package com.coderrr1ck.backend.user;
+package com.coderrr1ck.backend.role;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
@@ -12,4 +13,6 @@ public class Role {
     private Integer roleId;
     @Column(unique = true, nullable = false,length = 20)
     private String roleName;
+    private boolean active = true;
+
 }

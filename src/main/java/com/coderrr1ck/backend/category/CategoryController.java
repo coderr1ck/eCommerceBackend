@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class CategoryController {
 
     @PutMapping("{id}")
     public ResponseEntity<CategoryResponse> updateCategory(
-            @PathVariable("id") String id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody CategoryRequest categoryRequest
     ){
         return ResponseEntity.ok(categoryService.updateCategory(id,categoryRequest));
@@ -42,7 +44,7 @@ public class CategoryController {
 //    204 response
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteCategory(
-            @PathVariable("id") String id
+            @PathVariable("id") UUID id
     ) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();

@@ -1,5 +1,7 @@
 package com.coderrr1ck.backend.auth;
 
+import com.coderrr1ck.backend.cart.Cart;
+import com.coderrr1ck.backend.cart.CartRepository;
 import com.coderrr1ck.backend.user.User;
 import com.coderrr1ck.backend.user.UserRepository;
 import com.coderrr1ck.backend.user.UserService;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Service
@@ -29,6 +32,7 @@ public class AuthService {
         User user = userService.createUser(registerRequest.getUsername(),
                     passwordEncoder.encode(registerRequest.getPassword()),
                     registerRequest.getEmail());
+
         if (user != null) {
             return ResponseEntity
                     .ok(Map.of("message", "User registered successfully"));
@@ -40,7 +44,12 @@ public class AuthService {
 
     public AuthResponse getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String roles = authentication.getAuthorities().toString();
+        String roles = authentication
+                .getAuthorities()
+                .stream()
+                .map((a) -> a.getAuthority().substring(5))
+                .toList()
+                .toString();
         return AuthResponse.builder()
                 .user(authentication.getName())
                 .role(roles.substring(1, roles.length() - 1))

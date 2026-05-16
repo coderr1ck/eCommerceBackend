@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class OrderItemResponse {
-        String id;
+        UUID id;
         String product;
         Integer quantity;
         BigDecimal itemTotal;

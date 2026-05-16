@@ -6,11 +6,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -24,8 +28,7 @@ public class ProductController {
        public ResponseEntity<PagedResponseDTO<ProductResponse>> getAllProducts(
                @Valid SearchRequest searchRequest,
                @RequestParam(value = "categoryId" , required = false)
-               @Pattern(regexp = "^[a-zA-Z0-9\\s]*$",message = "Please provide valid categoryId")
-               String categoryId
+               UUID categoryId
                ) {
            PagedResponseDTO<ProductResponse> allProducts = productService.getAllProducts(searchRequest,categoryId);
            return ResponseEntity.ok(allProducts);
@@ -33,7 +36,7 @@ public class ProductController {
 
          @GetMapping("{id}")
          public ResponseEntity<ProductResponse> getProductById(
-                 @PathVariable("id") String id
+                 @PathVariable("id") UUID id
          ) {
              ProductResponse productResponse = productService.getProductById(id);
              return ResponseEntity.ok(productResponse);
@@ -48,10 +51,11 @@ public class ProductController {
            return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
        }
 
+
         @PutMapping("{id}")
         public ResponseEntity<ProductResponse> updateProduct(
                 @Valid @RequestBody ProductRequest productRequest,
-                @PathVariable("id") String id
+                @PathVariable("id") UUID id
         ) {
             ProductResponse savedProduct = productService.updateProduct(productRequest,id);
             return ResponseEntity.ok(savedProduct);
@@ -59,10 +63,11 @@ public class ProductController {
 
         @DeleteMapping("{id}")
         public ResponseEntity<Void> deleteProduct(
-                @PathVariable("id") String id
+                @PathVariable("id") UUID id
         ) {
             productService.deleteProduct(id);
             return ResponseEntity.noContent().build();
         }
+
 
 }

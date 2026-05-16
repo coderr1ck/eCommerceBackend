@@ -1,5 +1,6 @@
 package com.coderrr1ck.backend.payment;
 
+import com.coderrr1ck.backend.user.User;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
 import jakarta.validation.Valid;
@@ -7,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -18,24 +22,21 @@ public class PaymentController {
 
     @PostMapping("/initiate")
     public ResponseEntity<?> processPayment(
-            @Valid @RequestBody PaymentRequest paymentRequest
+            @Valid @RequestBody PaymentRequest paymentRequest,
+            Authentication authentication
     ) {
-        if(paymentRequest.isOnlinePayment()){
-            return ResponseEntity.ok(paymentService.processOnlinePayment(paymentRequest));
+        User user = (User) authentication.getPrincipal();
+        if(paymentRequest.getPaymentMode() == PaymentMode.ONLINE) {
+            return ResponseEntity.ok(paymentService.processOnlinePayment(user,paymentRequest));
         } else {
-                return ResponseEntity.ok(paymentService.processOfflinePayment(paymentRequest));
+                return ResponseEntity.ok(paymentService.processOfflinePayment(user,paymentRequest));
         }
     }
 
-//    polling endpoint to check and confirm payment status for online payments
-    @GetMapping("/status/{paymentId}")
-    public ResponseEntity<String> checkPaymentStatus(
-            @PathVariable String paymentId
-    ) {
-        return paymentService.getPaymentStatus(paymentId);
-    }
 
-    @PostMapping("/callback/razorpay")
+
+    @PostMapping("/callback/razorpay") // just to verify from razorpay
+    // if payment was captured,webhook will finally update db
     public ResponseEntity<Void> paymentCallback(
             @RequestBody @Valid PaymentVerificationRequest request
     ){
@@ -48,7 +49,7 @@ public class PaymentController {
     @PostMapping("/webhook/razorpay/verify")
     public ResponseEntity<Void> handleWebhook(
             @RequestBody String payload,
-            @RequestHeader("X-Razorpay-Signature") String signature) throws RazorpayException {
+            @RequestHeader("X-Razorpay-Signature") String signature) {
 
         return paymentService.handleRazorpayWebhook(payload,signature);
     }

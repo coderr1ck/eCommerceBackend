@@ -7,34 +7,41 @@ import com.coderrr1ck.backend.config.PagedResponseDTO;
 import com.coderrr1ck.backend.config.SearchRequest;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductMapper mapper;
 
-    public PagedResponseDTO<ProductResponse> getAllProducts(SearchRequest searchRequest,String categoryId) {
+    public PagedResponseDTO<ProductResponse> getAllProducts(SearchRequest searchRequest,UUID categoryId) {
         Pageable pageRequest = Pageable.ofSize(searchRequest.getSize()).withPage(searchRequest.getPage());
+
         Page<Product> pagedResponse = null;
+
         if(!StringUtils.isBlank(searchRequest.getQuery())){
-            System.out.println("Product search query is :"+searchRequest.getQuery());
-            String keyword = ".*"+searchRequest.getQuery()+".*";
-            pagedResponse = productRepository.findByNameRegexAndActiveTrue(keyword,pageRequest);
-            System.out.println("Returning product searched query paged response");
-        }else if(!StringUtils.isBlank(categoryId)){
-            pagedResponse = productRepository.findByCategoryIdAndActiveTrue(pageRequest,categoryId);
+            log.info("Product search query is :"+searchRequest.getQuery());
+            pagedResponse = productRepository.findByNameContainingIgnoreCaseAndActiveTrue(searchRequest.getQuery(),pageRequest);
+
+        }else if(categoryId != null){
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new CategoryNotFoundException(categoryId.toString()));
+            log.info("Fetching products for category :"+category.getName());
+            pagedResponse = productRepository.findByCategoryAndActiveTrue(pageRequest,category);
+
         }else {
-            pagedResponse = productRepository.findByActiveTrue(pageRequest);
+            pagedResponse = productRepository.findAllActiveProductsWithCategory(pageRequest);
         }
+
         List<Product> products = pagedResponse.getContent();
         List<ProductResponse> responseList = products.stream()
                 .map(mapper::toProductResponse)
@@ -60,6 +67,7 @@ public class ProductService {
         if(productInactive.isPresent()){
             Product productExists = productInactive.get();
             Product updatedProduct = mapper.mapProductRequestToProduct(productRequest, productExists);
+            updatedProduct.setActive(true);
             Product savedProduct = productRepository.save(updatedProduct);
             return mapper.toProductResponse(savedProduct);
         }
@@ -69,15 +77,20 @@ public class ProductService {
     }
 
 
-    public ProductResponse updateProduct(ProductRequest productRequest, String id) {
+    public ProductResponse updateProduct(ProductRequest productRequest, UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
+                .orElseThrow(() -> new ProductNotFoundException(id.toString()));
 
-        if(product.getActive()==false){
-            throw new ProductNotFoundException(product.getProductId());
+        if(!product.isActive()){
+            throw new ProductNotFoundException(product.getProductId().toString());
         }
-        Optional<Product> existingProductByName = productRepository.findByNameAndActiveFalse(productRequest.getName());
 
+        Optional<Product> existingProductByNameActive = productRepository.findByNameAndActiveTrue(productRequest.getName());
+        if(existingProductByNameActive.isPresent() && !existingProductByNameActive.get().getProductId().equals(id)) {
+            throw new ProductAlreadyExistsException(productRequest.getName());
+        }
+
+        Optional<Product> existingProductByName = productRepository.findByNameAndActiveFalse(productRequest.getName());
         if(existingProductByName.isPresent() && !existingProductByName.get().getProductId().equals(id)) {
             throw new ProductAlreadyExistsException(productRequest.getName());
         }
@@ -88,19 +101,21 @@ public class ProductService {
     }
 
 
-    public void deleteProduct(String id) {
+    public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
+                .orElseThrow(() -> new ProductNotFoundException(id.toString()));
         product.setActive(false);
+        product.getImages().clear();
         productRepository.save(product);
     }
 
-    public ProductResponse getProductById(String id) {
-        Product product = productRepository.findById(id).orElseThrow(
-                ()-> new ProductNotFoundException(id));
-        if(product.getActive() == false){
-            throw new ProductNotFoundException(product.getProductId());
+    public ProductResponse getProductById(UUID id) {
+        Product product = productRepository.findByIdWithCategoryAndImages(id).orElseThrow(
+                ()-> new ProductNotFoundException(id.toString()));
+        if(!product.isActive()){
+            throw new ProductNotFoundException(product.getProductId().toString());
         }
-        return mapper.toProductResponse(product);
+        return mapper.toSingleProductResponse(product);
     }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
@@ -25,9 +26,8 @@ public class CategoryService {
         Page<Category> pagedResponse = null;
         if(!StringUtils.isBlank(searchRequest.getQuery())){
             System.out.println("Category search query is :"+searchRequest.getQuery());
-            String keyword = ".*"+searchRequest.getQuery()+".*";
-            pagedResponse = categoryRepository.findByNameRegexAndActiveTrue(keyword,pageRequest);
-            System.out.println("Returning category searched query paged res.ponse");
+            pagedResponse = categoryRepository.findByNameContainingIgnoreCaseAndActiveTrue(searchRequest.getQuery(),pageRequest);
+            System.out.println("Returning category searched query paged response");
         }else{
             pagedResponse = categoryRepository.findByActiveTrue(pageRequest);
         }
@@ -54,6 +54,7 @@ public class CategoryService {
         if(category.isPresent()){
             Category categoryExists = category.get();
             categoryExists.setActive(true);
+            categoryExists.setDescription(categoryRequest.getDescription());
             return mapper.toCategoryResponse(categoryRepository.save(categoryExists));
         }else {
             Category categorytoSave = mapper.toCategory(categoryRequest);
@@ -62,11 +63,11 @@ public class CategoryService {
         }
     }
 
-    public CategoryResponse updateCategory(String id,CategoryRequest categoryRequest) {
+    public CategoryResponse updateCategory(UUID id, CategoryRequest categoryRequest) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException(id));
-        if(category.getActive()==false){
-            throw new CategoryNotFoundException(id);
+                .orElseThrow(() -> new CategoryNotFoundException(id.toString()));
+        if(!category.isActive()){
+            throw new CategoryNotFoundException(id.toString());
         }
         if(categoryRepository.existsByNameAndActiveTrue(categoryRequest.getName())) {
             throw new CategoryAlreadyExistsException(categoryRequest.getName());
@@ -76,9 +77,9 @@ public class CategoryService {
         return response;
     }
 
-    public void deleteCategory(String id) {
+    public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException(id));
+                .orElseThrow(() -> new CategoryNotFoundException(id.toString()));
         category.setActive(false);
         categoryRepository.save(category);
     }

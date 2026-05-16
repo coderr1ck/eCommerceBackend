@@ -1,8 +1,7 @@
-package com.coderrr1ck.backend.product;
+package com.coderrr1ck.backend.productImage;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.coderrr1ck.backend.product.Product;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
@@ -10,6 +9,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -21,6 +21,7 @@ import java.time.Instant;
 @Table(name = "product_image", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"product_id", "originalFilename"})
 })
+@EntityListeners(AuditingEntityListener.class)
 public class ProductImage {
 
     @Id
@@ -38,8 +39,6 @@ public class ProductImage {
     @JoinColumn(name = "product_id", nullable = false)
     @ToString.Exclude
     private Product product;
-
-    private boolean active = true;
 
     @CreatedDate
     private Instant createdAt;

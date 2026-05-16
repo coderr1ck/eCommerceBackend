@@ -1,44 +1,62 @@
 package com.coderrr1ck.backend.user;
 
+import com.coderrr1ck.backend.cart.Cart;
+import com.coderrr1ck.backend.role.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-@Document(collection = "users")
+@Entity
+@Table(name = "users")
 @Data
 @Builder
+@EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements UserDetails {
+
     @Id
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID userId;
 
     @NotNull
     private String username;
 
-    @NotNull
-    @Indexed(unique = true)
+
+    @Column(unique = true,nullable = false)
     private String email;
 
     @Nullable
     private String password;
 
-    @NotNull
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @JsonIgnore
+//    again no need to mention inverse side (Set<User> in Role) as
+//    we will not be fetching users from role,
+//    we will only be fetching roles from user,
+    private Set<Role> roles = new HashSet<>();
 
-    @NotNull
-    private List<AuthProvider> authProviders;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private List<AuthProvider> authProviders = new ArrayList<>();
 
     private boolean active = true;
 
@@ -48,9 +66,17 @@ public class User implements UserDetails {
     @LastModifiedDate
     private Instant updatedAt;
 
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.toString()));
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .toList();
     }
 
     @Override
