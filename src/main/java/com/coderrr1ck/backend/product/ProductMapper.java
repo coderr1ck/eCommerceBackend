@@ -3,6 +3,7 @@ package com.coderrr1ck.backend.product;
 import com.coderrr1ck.backend.category.Category;
 import com.coderrr1ck.backend.category.CategoryNotFoundException;
 import com.coderrr1ck.backend.category.CategoryRepository;
+import com.coderrr1ck.backend.productImage.ProductImageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +47,15 @@ public class ProductMapper {
         response.setPrice(product.getPrice());
         response.setStock(product.getAvailableStock());
         response.setCategory(product.getCategory().getName());
-        response.setImageUrls(product
+        response.setPrimaryImageUrl(product.getPrimaryImage() != null ? product.getPrimaryImage().getUrl() : null);
+        response.setImages(product
                 .getImages()
                 .stream()
-                .map((img)->img.getUrl())
+                .map((img)->ProductImageResponse
+                        .builder()
+                        .id(img.getId())
+                        .url(img.getUrl())
+                        .build())
                 .toList());;
         return response;
     }

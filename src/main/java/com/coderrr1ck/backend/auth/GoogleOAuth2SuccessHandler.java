@@ -73,13 +73,14 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             Cookie oauthCookie = new Cookie("oauthToken", oauthToken);
             oauthCookie.setHttpOnly(true);
             oauthCookie.setMaxAge(15*60);
+            oauthCookie.setPath("/");
             response.addCookie(oauthCookie);
 
             String refreshToken = jwtUtil.generateRefreshToken(email);
             Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
             refreshCookie.setHttpOnly(true);
 //                refreshCookie.setSecure(true); if only want it to be sent over https
-            refreshCookie.setPath("/api/v1/auth/refresh");
+            refreshCookie.setPath("/api/v1/auth");
             refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
             response.addCookie(refreshCookie);
             response.sendRedirect(frontendUrl);

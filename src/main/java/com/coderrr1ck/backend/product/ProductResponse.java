@@ -1,5 +1,6 @@
 package com.coderrr1ck.backend.product;
 
+import com.coderrr1ck.backend.productImage.ProductImageResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,5 +23,5 @@ public class ProductResponse {
     private String primaryImageUrl;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<String> imageUrls;
+    private List<ProductImageResponse> images;
 }

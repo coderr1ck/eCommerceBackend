@@ -102,6 +102,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/oauth2/authorization/google",
                                 "/api/v1/payments/webhook/razorpay/verify",
+                                "/api/v1/products/**",
+                                "/api/v1/categories/**",
                                 "/v2/api-docs",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

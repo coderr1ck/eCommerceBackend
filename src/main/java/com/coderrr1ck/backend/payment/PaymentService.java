@@ -219,6 +219,7 @@ public class PaymentService {
 
 
     public boolean validatePaymentRequestCallback(PaymentVerificationRequest request) {
+        System.out.println(request);
         try {
             JSONObject attributes = new JSONObject();
             attributes.put("razorpay_order_id", request.orderId());

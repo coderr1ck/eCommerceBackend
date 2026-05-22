@@ -29,7 +29,7 @@ public class CartController {
         return ResponseEntity.ok(cartResponse);
     }
 
-    @PostMapping
+    @PostMapping("items")
     public ResponseEntity<Void> addCartItem(
             @Valid @RequestBody CartRequest cartRequest,
             Authentication authentication

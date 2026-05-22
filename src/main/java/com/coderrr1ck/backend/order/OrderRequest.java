@@ -11,5 +11,5 @@ public class OrderRequest {
     private UUID idempotencyKey;
 
     @NotNull(message = "Address ID is required")
-    private UUID addressId;
+    private Integer addressId;
 }

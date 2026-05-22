@@ -62,14 +62,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Cookie accessCookie = new Cookie("accessToken", accessToken);
                 accessCookie.setHttpOnly(true);
                 accessCookie.setMaxAge(60*60);
-                accessCookie.setPath("/api/v1");
+                accessCookie.setPath("/");
                 response.addCookie(accessCookie);
 
                 String refreshToken = jwtUtil.generateRefreshToken(authentication.getName());
                 Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
                 refreshCookie.setHttpOnly(true);
 //                refreshCookie.setSecure(true); if only want it to be sent over https
-                refreshCookie.setPath("/api/v1/auth/refresh");
+                refreshCookie.setPath("/api/v1/auth");
                 refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
                 response.addCookie(refreshCookie);
             }

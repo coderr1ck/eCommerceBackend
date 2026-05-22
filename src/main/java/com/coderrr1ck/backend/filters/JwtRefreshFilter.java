@@ -50,7 +50,7 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             Cookie accessCookie = new Cookie("accessToken", newAccessToken);
             accessCookie.setHttpOnly(true);
             accessCookie.setMaxAge(60*60);
-            accessCookie.setPath("/api/v1");
+            accessCookie.setPath("/");
             response.addCookie(accessCookie);
 //            no need to implment new refresh token generation for now
         }

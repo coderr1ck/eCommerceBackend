@@ -1,5 +1,8 @@
 package com.coderrr1ck.backend.order;
 
+import com.coderrr1ck.backend.address.Address;
+import com.coderrr1ck.backend.address.AddressNotFound;
+import com.coderrr1ck.backend.address.AddressRepository;
 import com.coderrr1ck.backend.cart.Cart;
 import com.coderrr1ck.backend.cart.CartItem;
 import com.coderrr1ck.backend.cart.CartService;
@@ -28,9 +31,13 @@ public class OrderService {
     private final OrderMapper mapper;
     private final CartService cartService;
     private final ProductRepository productRepository;
+    private final AddressRepository addressRepository;
 
     @Transactional
     public OrderResponse placeOrder(User user,OrderRequest orderRequest) {
+
+        Address userAddress = addressRepository.findById(orderRequest.getAddressId())
+                .orElseThrow(()->new AddressNotFound("Address not found with id :"+orderRequest.getAddressId()));
 
         Optional<Order> savedOrderDB = orderRepository.findByIdempotencyKey(orderRequest.getIdempotencyKey());
         if(savedOrderDB.isPresent()){
@@ -58,7 +65,7 @@ public class OrderService {
         Order newOrder = Order.builder()
                 .user(user)
                 .orderItems(new ArrayList<>())
-                .address(null)
+                .address(userAddress)
                 .totalItems(cart.getItems())
                 .subTotal(cart.getSubTotal())
                 .idempotencyKey(orderRequest.getIdempotencyKey())
@@ -69,11 +76,13 @@ public class OrderService {
 
         List<OrderItem> orderItems = new ArrayList<>();
         for(CartItem item : cartItems){
-            int rowsAffected = productRepository.reserveStockAtomic(item.getProduct().getProductId(), item.getQuantity());
-            if(rowsAffected == 0){
-                throw new InsufficientStockException("Product currently out of stock "+item.getProduct().getName());
+            if(item.isActive()) {
+                int rowsAffected = productRepository.reserveStockAtomic(item.getProduct().getProductId(), item.getQuantity());
+                if (rowsAffected == 0) {
+                    throw new InsufficientStockException("Product currently out of stock " + item.getProduct().getName());
+                }
+                orderItems.add(mapper.mapCartItemToOrderItem(item, newOrder));
             }
-            orderItems.add(mapper.mapCartItemToOrderItem(item,newOrder));
         }
 
         newOrder.setOrderItems(orderItems);
