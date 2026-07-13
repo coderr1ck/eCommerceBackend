@@ -22,11 +22,11 @@ import java.util.*;
 @Slf4j
 public class PaymentService {
 
-    @Value("${razorpay.key.id:rzp_test_1DP5mmOlF5G5ag}")
+    @Value("${razorpay.key-id:rzp_test_1DP5mmOlF5G5ag}")
     private String razorpayKeyId;
-    @Value("${razorpay.key.secret:your_razorpay_key_secret}")
+    @Value("${razorpay.key-secret:your_razorpay_key_secret}")
     private String razorpayKeySecret;
-    @Value("${razorpay.webhook.secret:r8t8kp@t3l11}")
+    @Value("${razorpay.webhook-secret:r8t8kp@t3l11}")
     private String webhookSecret;
 
     public PaymentService(RazorpayClient razorpayClient,
