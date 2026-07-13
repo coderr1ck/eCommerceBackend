@@ -7,18 +7,17 @@ WORKDIR /build
 COPY pom.xml .
 
 # Download dependencies separately to leverage true Docker layer caching
-RUN --mount=type=cache,target=/root/.m2 \
-    mvn dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copy source code and build the package
+
 COPY src ./src
 
 # Build without running unit tests
-RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B
 
 # --- Stage 2: Create the lightweight runtime image ---
-FROM eclipse-temurin:17-jre-alpine
+FROM gcr.io/distroless/java17-debian13
 
 WORKDIR /app
 
