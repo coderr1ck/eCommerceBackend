@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8080,http://127.0.0.1:5501}")
+    @Value("${ALLOWED_ORIGINS:http://localhost:4173,http://localhost:8080,http://127.0.0.1:5501}")
     private String allowedOrigins;
 
     public SecurityConfig(UserService userService, JwtUtil jwtUtil) {
@@ -98,12 +99,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/products/**",
+                                "/api/v1/categories/**").permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/oauth2/authorization/google",
                                 "/api/v1/payments/webhook/razorpay/verify",
-                                "/api/v1/products/**",
-                                "/api/v1/categories/**",
                                 "/v2/api-docs",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

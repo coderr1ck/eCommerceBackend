@@ -34,8 +34,6 @@ public class JwtAuthValidationFilter extends OncePerRequestFilter {
             "/swagger-ui",
             "/api/v1/auth/register",
             "/api/v1/payments/webhook/razorpay/verify",
-            "/api/v1/products",
-            "/api/v1/categories"
     };
     private final AuthenticationManager authenticationManager;
 
